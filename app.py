@@ -34,6 +34,9 @@ def findAllQuery(table):
 def insertQuery(args):
     return ("INSERT INTO {} (`firstname`, `lastname`) VALUES ('{}', '{}')".format(args.context, args.firstname, args.lastname))
 
+def insertMovieQuery(args):
+    return ("INSERT INTO {} (`title`, `duration`, `original_title`, `rating`) VALUES ('{}', '{}', '{}', '{}')".format(args.context, args.title, args.duration, args.original_title, args.rating))
+
 def find(table, id):
     cnx = connectToDatabase()
     cursor = createCursor(cnx)
@@ -61,6 +64,14 @@ def insert(args):
     closeCursor(cursor)
     disconnectDatabase(cnx)
 
+def insertMovie(args):
+    cnx = connectToDatabase()
+    cursor = createCursor(cnx)
+    cursor.execute(insertMovieQuery(args))
+    cnx.commit()
+    closeCursor(cursor)
+    disconnectDatabase(cnx)
+
 def printPerson(person):
     print("#{}: {} {}".format(person['id'], person['firstname'], person['lastname']))
 
@@ -82,6 +93,10 @@ find_parser.add_argument('id' , help='Identifant Ã  rechercher')
 insert_parser = action_subparser.add_parser('insert', help='Insertion')
 insert_parser.add_argument('--firstname', help='Prénom des personnes à rajouter')
 insert_parser.add_argument('--lastname', help='Nom des personnes à rajouter' )
+insert_parser.add_argument('--title', help='Nom du film')
+insert_parser.add_argument('--duration', help='Durée du film')
+insert_parser.add_argument('--original-title', help='Titre originel')
+insert_parser.add_argument('--rating', help='Limite âge')
 
 args = parser.parse_args()
 
@@ -116,3 +131,5 @@ if args.context == "movies":
         movies = find("movies", movieId)
         for movie in movies:
             printMovie(movie)
+    if args.action == "insert":
+        insertMovie(args)
