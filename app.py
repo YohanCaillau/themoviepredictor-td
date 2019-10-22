@@ -10,6 +10,41 @@ import mysql.connector
 import sys
 import argparse
 import csv
+import requests
+from bs4 import BeautifulSoup
+
+r = requests.get("https://fr.wikipedia.org/wiki/Joker_(film,_2019)")
+soup = BeautifulSoup(r.text, 'html.parser')
+
+#1
+fiche_technique = soup.find(id="Fiche_technique")
+
+#2
+parent = fiche_technique.parent 
+
+#3
+unorderedlist = parent.find_next('ul')
+
+#4
+listing = unorderedlist.findChildren('li')
+
+#5
+scrap_dict={}
+
+for item in listing:
+    key = item.get_text().split(":")[0]
+    value = item.find(['a', 'i'])
+    if value:
+         scrap_dict[key] = value.getText()
+
+print(scrap_dict)
+
+#listing = unorderedlist.contents[0]
+#movietitle = listing.find_all('i')[0].get_text()
+#print(movietitle)
+#movietitle = listing.contents[0].get_text()
+
+exit()
 
 def connectToDatabase():
     return mysql.connector.connect(user='predictor', password='predictor',
@@ -111,8 +146,6 @@ if known_args.context == "movies":
     insert_parser.add_argument('--original-title' , help='Titre original', required=True)
     insert_parser.add_argument('--release-date' , help='Date de sortie en France', required=True)
     insert_parser.add_argument('--rating' , help='Classification du film', choices=('TP', '-12', '-16'), required=True)
-
-
 
 args = parser.parse_args()
 
